@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Directory Downloader</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle">🌓</button>
+    <div class="container">
+        <h1 class="title">GitHub Directory Downloader</h1>
+        <form id="downloadForm" class="form">
+            <div class="input-group">
+                <label for="repoUrl">Repository URL</label>
+                <input type="text" id="repoUrl" name="repoUrl" required>
+            </div>
+            <div class="input-group">
+                <label for="subDir">Subdirectory Path</label>
+                <input type="text" id="subDir" name="subDir" required>
+            </div>
+            <button type="submit" class="btn">Download</button>
+        </form>
+        <div id="result" class="result"></div>
+        <div id="loading" class="loading" style="display: none;">
+            <div class="loader"></div>
+            <p class="loading-text"></p>
+        </div>
+    </div>
+
+    <script>
+        const loadingTexts = ["Fetching repository...", "Preparing download..."];
+        let currentTextIndex = 0;
+
+        function updateLoadingText() {
+            const loadingTextElement = document.querySelector('.loading-text');
+            loadingTextElement.textContent = loadingTexts[currentTextIndex];
+            currentTextIndex = (currentTextIndex + 1) % loadingTexts.length;
+        }
+
+document.getElementById('downloadForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const repoUrl = document.getElementById('repoUrl').value;
+    const subDir = document.getElementById('subDir').value;
+
+    document.getElementById('loading').style.display = 'flex';
+    document.getElementById('result').innerHTML = '';
+
+    const loadingInterval = setInterval(updateLoadingText, 2000);
+
+    try {
+        const response = await fetch('/api/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ repoUrl, subDir })
+        });
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || 'Server error');
+            }
+            document.getElementById('result').textContent = 'Error: ' + result.error;
+        } else {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'subdir.zip';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.getElementById('result').textContent = 'Download complete!';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('result').textContent = 'An unexpected error occurred: ' + error.message;
+    } finally {
+        clearInterval(loadingInterval);
+        document.getElementById('loading').style.display = 'none';
+    }
+});
+        
+
+// Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            updateThemeToggleText();
+        });
+
+        function updateThemeToggleText() {
+            themeToggle.textContent = html.classList.contains('dark') ? '☀️' : '🌓';
+        }
+
+        // Initialize theme based on user preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            html.classList.add('dark');
+        }
+        updateThemeToggleText();
+    </script>
+</body>
+</html>
