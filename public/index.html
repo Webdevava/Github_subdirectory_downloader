@@ -5,7 +5,196 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Directory Downloader</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --background: hsl(22, 30%, 95%);
+            --foreground: hsl(22, 5%, 0%);
+            --card: hsl(22, 30%, 90%);
+            --card-foreground: hsl(22, 5%, 10%);
+            --popover: hsl(22, 30%, 95%);
+            --popover-foreground: hsl(22, 95%, 0%);
+            --primary: hsl(22, 89%, 49%);
+            --primary-foreground: hsl(0, 0%, 100%);
+            --secondary: hsl(22, 30%, 70%);
+            --secondary-foreground: hsl(0, 0%, 0%);
+            --muted: hsl(344, 30%, 85%);
+            --muted-foreground: hsl(22, 5%, 35%);
+            --accent: hsl(344, 30%, 80%);
+            --accent-foreground: hsl(22, 5%, 10%);
+            --destructive: hsl(0, 50%, 30%);
+            --destructive-foreground: hsl(22, 5%, 90%);
+            --border: hsl(22, 30%, 50%);
+            --input: hsl(22, 30%, 18%);
+            --ring: hsl(22, 89%, 49%);
+            --radius: 0.5rem;
+        }
+
+        .dark {
+            --background: hsl(22, 30%, 5%);
+            --foreground: hsl(22, 5%, 90%);
+            --card: hsl(22, 30%, 0%);
+            --card-foreground: hsl(22, 5%, 90%);
+            --popover: hsl(22, 30%, 5%);
+            --popover-foreground: hsl(22, 5%, 90%);
+            --primary: hsl(22, 89%, 49%);
+            --primary-foreground: hsl(0, 0%, 100%);
+            --secondary: hsl(22, 30%, 10%);
+            --secondary-foreground: hsl(0, 0%, 100%);
+            --muted: hsl(344, 30%, 15%);
+            --muted-foreground: hsl(22, 5%, 60%);
+            --accent: hsl(344, 30%, 15%);
+            --accent-foreground: hsl(22, 5%, 90%);
+            --destructive: hsl(0, 50%, 30%);
+            --destructive-foreground: hsl(22, 5%, 90%);
+            --border: hsl(22, 30%, 18%);
+            --input: hsl(22, 30%, 18%);
+            --ring: hsl(22, 89%, 49%);
+            --radius: 0.5rem;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            background-color: var(--card);
+            color: var(--card-foreground);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--muted-foreground);
+        }
+
+        input {
+            padding: 0.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background-color: var(--background);
+            color: var(--foreground);
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--ring);
+            box-shadow: 0 0 0 2px var(--ring);
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            border-radius: var(--radius);
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-foreground);
+            color: var(--primary);
+        }
+
+        .result {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .download-link {
+            display: inline-block;
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .download-link:hover {
+            background-color: var(--primary-foreground);
+            color: var(--primary);
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .loader {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid var(--muted);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--foreground);
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <button class="theme-toggle" id="themeToggle">🌓</button>
@@ -39,69 +228,41 @@
             currentTextIndex = (currentTextIndex + 1) % loadingTexts.length;
         }
 
-document.getElementById('downloadForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const repoUrl = document.getElementById('repoUrl').value;
-    const subDir = document.getElementById('subDir').value;
+        document.getElementById('downloadForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const repoUrl = document.getElementById('repoUrl').value;
+            const subDir = document.getElementById('subDir').value;
 
-    document.getElementById('loading').style.display = 'flex';
-    document.getElementById('result').innerHTML = '';
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('result').textContent = '';
 
-    const loadingInterval = setInterval(updateLoadingText, 2000);
+            const updateInterval = setInterval(updateLoadingText, 1000);
 
-    try {
-        const response = await fetch('/api/download', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ repoUrl, subDir })
-        });
+            try {
+                const response = await fetch(`/download?repoUrl=${encodeURIComponent(repoUrl)}&subDir=${encodeURIComponent(subDir)}`);
+                const data = await response.json();
+                clearInterval(updateInterval);
+                document.getElementById('loading').style.display = 'none';
 
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.error || 'Server error');
+                if (data.error) {
+                    document.getElementById('result').textContent = `Error: ${data.error}`;
+                } else {
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = data.url;
+                    downloadLink.textContent = 'Download Link';
+                    downloadLink.className = 'download-link';
+                    document.getElementById('result').appendChild(downloadLink);
+                }
+            } catch (error) {
+                clearInterval(updateInterval);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('result').textContent = `Error: ${error.message}`;
             }
-            document.getElementById('result').textContent = 'Error: ' + result.error;
-        } else {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'subdir.zip';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.getElementById('result').textContent = 'Download complete!';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('result').textContent = 'An unexpected error occurred: ' + error.message;
-    } finally {
-        clearInterval(loadingInterval);
-        document.getElementById('loading').style.display = 'none';
-    }
-});
-        
-
-// Theme toggle functionality
-        const themeToggle = document.getElementById('themeToggle');
-        const html = document.documentElement;
-
-        themeToggle.addEventListener('click', () => {
-            html.classList.toggle('dark');
-            updateThemeToggleText();
         });
 
-        function updateThemeToggleText() {
-            themeToggle.textContent = html.classList.contains('dark') ? '☀️' : '🌓';
-        }
-
-        // Initialize theme based on user preference
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            html.classList.add('dark');
-        }
-        updateThemeToggleText();
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
     </script>
 </body>
 </html>
